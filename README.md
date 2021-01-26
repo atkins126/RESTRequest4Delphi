@@ -19,8 +19,7 @@
 * **Manual installation**: Add the following folders to your project, in *Project > Options > Resource Compiler > Directories and Conditionals > Include file search path*
 
 ```
-../RESTRequest4Delphi/src/core
-../RESTRequest4Delphi/src/interfaces
+../RESTRequest4Delphi/src
 ```
 
 * Installation using the [**Boss**](https://github.com/HashLoad/boss):
@@ -29,21 +28,33 @@
 boss install github.com/viniciussanchez/RESTRequest4Delphi
 ```
 
+## 🔰 Engines
+
+By default, the components **TRESTRequest**, **TRESTResponse** and **TRESTClient** are used to make requests when your using Delphi. If you use Lazarus, the **Indy** components are used by default. The RESTRequest4Delphi has support to three enginies to make requests: RESTClient, Indy and NetHTTP. You can change the engine to make requests. To do this, simply define in: *Project > Options > Delphi Compiler > Conditional defines* the compiler directive `RR4D_INDY` or `RR4D_NETHTTP`
+
+***Note**: for Lazarus, only the engine using Indy is available and it is already the default. You don't need to define directive.*
+
 ## ⚡️ Quickstart
 
-You need to use RESTRequest4D.Request
+You need to use RESTRequest4D
 
 ```pascal
-uses RESTRequest4D.Request;
+uses RESTRequest4D;
 ```
 
 * **GET**
 
 ```pascal
+var
+  LResponse: IResponse;
 begin
-  TRequest.New.BaseURL('http://localhost:8888/users')
+  LResponse := TRequest.New.BaseURL('http://localhost:8888/users')
+    .AddHeader('HeaderName', 'HeaderValue')
+    .AddParam('ParameterName', 'ParameterValue')
     .Accept('application/json')
     .Get;
+  if LResponse.StatusCode = 200 then
+    ShowMessage(LResponse.Content);
 end;
 ``` 
 

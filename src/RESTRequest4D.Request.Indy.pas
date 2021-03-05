@@ -68,8 +68,11 @@ type
     function AddParam(const AName, AValue: string): IRequest;
     function AddFile(const AName: string; const AValue: TStream): IRequest;
     function MakeURL(const AIncludeParams: Boolean = True): string;
+	  function Proxy(const AServer, APassword, AUsername: string; const APort: Integer): IRequest;
+    function DeactivateProxy: IRequest;
     procedure OnStatusInfoEx(ASender: TObject; const AsslSocket: PSSL; const AWhere, Aret: TIdC_INT; const AType, AMsg: string);
-    procedure DoAfterExecute;
+  protected
+    procedure DoAfterExecute; virtual;
   public
     constructor Create;
     destructor Destroy; override;
@@ -162,11 +165,29 @@ begin
   Self.DoAfterExecute;
 end;
 
+function TRequestIndy.Proxy(const AServer, APassword, AUsername: string; const APort: Integer): IRequest;
+begin
+  Result := Self;
+  FIdHTTP.ProxyParams.ProxyServer := AServer;
+  FIdHTTP.ProxyParams.ProxyPassword := APassword;
+  FIdHTTP.ProxyParams.ProxyUsername := AUsername;
+  FIdHTTP.ProxyParams.ProxyPort := APort;
+end;
+
 function TRequestIndy.Get: IResponse;
 begin
   Result := FResponse;
   FIdHTTP.Get(TIdURI.URLEncode(MakeURL), FStreamResult);
   Self.DoAfterExecute;
+end;
+
+function TRequestIndy.DeactivateProxy: IRequest;
+begin
+  Result := Self;
+  FIdHTTP.ProxyParams.ProxyServer := EmptyStr;
+  FIdHTTP.ProxyParams.ProxyPassword := EmptyStr;
+  FIdHTTP.ProxyParams.ProxyUsername := EmptyStr;
+  FIdHTTP.ProxyParams.ProxyPort := 0;
 end;
 
 function TRequestIndy.Delete: IResponse;
@@ -405,7 +426,6 @@ begin
   FParams := TStringList.Create;
 
   FStreamResult := TStringStream.Create;
-
   Self.ContentType('application/json');
 end;
 
